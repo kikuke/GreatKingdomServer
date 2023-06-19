@@ -3,16 +3,21 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include <errno.h>
+#include <thread>
 
 #include "socket.h"
 #include "epoll.h"
 #include "ServerInfo.h"
 #include "SocketManager.h"
+#include "ServerThread.h"
 #include "Logger.h"
 
 #define SERV_ADDR INADDR_ANY
 #define SERV_PORT 1234
 #define EPOLL_SIZE 5000
+
+#define READ_THREAD_SIZE 4
+#define READ_BUFFER_SIZE 2048
 
 #define LOG_DIR "../logfile"
 
@@ -26,6 +31,8 @@ int main(void)
     struct epoll_event *ep_events;
 
     JobQueue jobQueue;
+
+    std::thread* readThreads[READ_THREAD_SIZE];
 
     Logger::LoggerSetting(LOGLEVEL::DEBUG);
     Logger logger(LOG_DIR, "main.txt");
@@ -48,6 +55,10 @@ int main(void)
     }
 
     SocketManager socketManager(serv_sock, epfd, &jobQueue, LOG_DIR, "SocketManager.txt");
+    for (int i=0; i < READ_THREAD_SIZE; i++) {
+        readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
+    }
+
     do
     {
         if ((event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1)) < 0) {
@@ -60,6 +71,10 @@ int main(void)
             }
         }
     } while (true);
+
+    for (int i=0; i < READ_THREAD_SIZE; i++) {
+        readThreads[i]->join();
+    }
 
     logger.Log(LOGLEVEL::INFO, "Server End...");
 

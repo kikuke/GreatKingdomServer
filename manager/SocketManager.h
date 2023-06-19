@@ -20,10 +20,8 @@ private:
 
     void RemoveTCPSOCKETINFO(TCPSOCKETINFO *info);
 
-    int AddID(int id, int sock);
-
+    // 연결 시 사용
     int AddSocketInfo(int socket);
-    int DelSocketInfo(int socket);
 
     int AcceptNewClient();
 
@@ -36,6 +34,12 @@ public:
 
     int getSocketByID(int id);
     TCPSOCKETINFO* getSocketInfo(int socket);
+    
+    //Todo: id 등록 API 만들기
+    // ID 등록 요청 때 사용
+    int AddID(int id, int sock);
+    // 연결 종료 시 사용
+    int DelSocketInfo(int socket);
 
     int Networking(int event_sock);
 };
