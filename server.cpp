@@ -55,6 +55,7 @@ int main(void)
 
     logger.Log(LOGLEVEL::INFO, "Server End...");
 
+    free(ep_events);
     close(epfd);
     close(serv_sock);
     exit(0);
