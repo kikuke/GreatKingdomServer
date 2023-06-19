@@ -1,0 +1,2 @@
+# GreatKingdomServer
+Impl GreatKingdomServer
