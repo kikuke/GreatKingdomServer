@@ -6,11 +6,15 @@
 
 #include "socket.h"
 #include "epoll.h"
+#include "ServerInfo.h"
+#include "SocketManager.h"
 #include "Logger.h"
 
 #define SERV_ADDR INADDR_ANY
 #define SERV_PORT 1234
 #define EPOLL_SIZE 5000
+
+#define LOG_DIR "../logfile"
 
 using namespace std;
 
@@ -21,8 +25,10 @@ int main(void)
 
     struct epoll_event *ep_events;
 
+    JobQueue jobQueue;
+
     Logger::LoggerSetting(LOGLEVEL::DEBUG);
-    Logger logger("../logfile", "log.txt");
+    Logger logger(LOG_DIR, "main.txt");
 
     logger.Log(LOGLEVEL::INFO, "Server Start...");
 
@@ -41,15 +47,17 @@ int main(void)
         exit(1);
     }
 
+    SocketManager socketManager(serv_sock, epfd, &jobQueue, LOG_DIR, "SocketManager.txt");
     do
     {
         if ((event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1)) < 0) {
             logger.Log(LOGLEVEL::ERROR, "epoll_wait: %s", strerror(errno));
-            //Todo: exit이 맞을지
         }
 
         for (int i=0; i < event_cnt; i++) {
-
+            if (socketManager.Networking(ep_events[i].data.fd) < 0) {
+                logger.Log(LOGLEVEL::ERROR, "Networking Error: %s", strerror(errno));
+            }
         }
     } while (true);
 

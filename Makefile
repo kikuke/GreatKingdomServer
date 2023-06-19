@@ -1,6 +1,6 @@
-INCLUDE = -I../CppServerTools/socket/ -I../CppServerTools/struct/ -I../CppServerTools/epoll/ -I../CppServerTools/packet/basepacket -I../CppServerTools/log/
-SUBDIRS =
-MODULE =
+INCLUDE = -I../CppServerTools/socket/ -I../CppServerTools/struct/ -I../CppServerTools/epoll/ -I../CppServerTools/packet/basepacket -I../CppServerTools/log/ -Iinfo/ -Istruct/ -Imanager/
+SUBDIRS = manager
+MODULE = manager/SocketManager.o
 RESULT = server
 CC = g++ -g
 
@@ -25,8 +25,8 @@ clean:
 
 
 #Main File
-server: server.o
-	$(CC) -o $@ $^ -L. -lserver_tools
+server: server.o $(MODULE)
+	$(CC) -o $@ $^ -L../CppServerTools/ -lserver_tools
 
 
 #Application
