@@ -7,6 +7,8 @@
 
 #include "socket.h"
 #include "epoll.h"
+#include "BasePacketHandler.h"
+#include "BasePacketManager.h"
 #include "ServerInfo.h"
 #include "SocketManager.h"
 #include "ServerThread.h"
@@ -20,6 +22,7 @@
 #define READ_BUFFER_SIZE 2048
 
 #define LOG_DIR "../logfile"
+#define PACKETMANAGER_DIR "../packetmanager"
 
 using namespace std;
 
@@ -32,7 +35,8 @@ int main(void)
 
     JobQueue jobQueue;
 
-    std::thread* readThreads[READ_THREAD_SIZE];
+    std::thread *readThreads[READ_THREAD_SIZE];
+    std::thread *workThread;
 
     Logger::LoggerSetting(LOGLEVEL::DEBUG);
     Logger logger(LOG_DIR, "main.txt");
@@ -59,6 +63,11 @@ int main(void)
         readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
     }
 
+    //Insert Packet Handles
+    BasePacketHandler *packetHandles[] = {};
+    BasePacketManager basePacketManager(packetHandles, sizeof(packetHandles) / sizeof(*packetHandles), PACKETMANAGER_DIR, "BasePacketManager.txt");
+    workThread = new std::thread(WorkThread, &socketManager, &jobQueue, &basePacketManager);
+
     do
     {
         if ((event_cnt = epoll_wait(epfd, ep_events, EPOLL_SIZE, -1)) < 0) {
@@ -75,6 +84,7 @@ int main(void)
     for (int i=0; i < READ_THREAD_SIZE; i++) {
         readThreads[i]->join();
     }
+    workThread->join();
 
     logger.Log(LOGLEVEL::INFO, "Server End...");
 

@@ -7,7 +7,7 @@
 
 #define LOG_DIR "../logfile"
 
-ssize_t RingBufferReader(int fd, void* buf, size_t buf_sz, RingBuffer *ringBuffer) {
+ssize_t RingBufferReader(int fd, void *buf, size_t buf_sz, RingBuffer *ringBuffer) {
     ssize_t temp_len = -1;
     ssize_t str_len = 0;
 
@@ -31,14 +31,14 @@ ssize_t RingBufferReader(int fd, void* buf, size_t buf_sz, RingBuffer *ringBuffe
     }
 }
 
-void ReadThread(SocketManager* socketManager, JobQueue* jobQueue, const int buf_sz) {
+void ReadThread(SocketManager *socketManager, JobQueue *jobQueue, const int buf_sz) {
     int sock;
 
     char buf[buf_sz];
     TCPSOCKETINFO *info;
 
     Logger logger(LOG_DIR, "ReadThread.txt");
-    logger.Log(LOGLEVEL::DEBUG, "ReadThread Start...");
+    logger.Log(LOGLEVEL::DEBUG, "Read Thread Start...");
 
     while ((sock = jobQueue->readQueue.pop())) {
         logger.Log(LOGLEVEL::DEBUG, "Read Socket: %d", sock);
@@ -64,4 +64,28 @@ void ReadThread(SocketManager* socketManager, JobQueue* jobQueue, const int buf_
     }
 
     logger.Log(LOGLEVEL::ERROR, "Read Thread Down...");
+}
+
+void WorkThread(SocketManager *socketManager, JobQueue *jobQueue, BasePacketManager *basePacketManager) {
+    int sock;
+
+    TCPSOCKETINFO *info;
+
+    Logger logger(LOG_DIR, "WorkThread.txt");
+    logger.Log(LOGLEVEL::DEBUG, "Work Thread Start...");
+
+    while ((sock = jobQueue->workQueue.pop())) {
+        logger.Log(LOGLEVEL::DEBUG, "Work Socket: %d", sock);
+
+        if ((info = socketManager->getSocketInfo(sock)) == NULL) {
+            logger.Log(LOGLEVEL::ERROR, "Can't find Socket To Work: %d", sock);
+            continue;
+        }
+
+        while (basePacketManager->execute(sock, *(info->recvBuffer)) != -1) {
+            logger.Log(LOGLEVEL::DEBUG, "basePacketManager execute: %d", sock);
+        }
+    }
+
+    logger.Log(LOGLEVEL::ERROR, "Work Thread Down...");
 }
