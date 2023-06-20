@@ -26,8 +26,16 @@
 
 using namespace std;
 
+int run(BasePacketHandler **handlers, size_t handler_size);
+
 int main(void)
 {
+    BasePacketHandler *handlers[] = {};
+    run(handlers, sizeof(handlers) / sizeof(*handlers));
+}
+
+//Todo: 좀더 클래스로 추상화 시켜보기. 로거 디렉토리 설정 깔끔하게 해놓기. 다른 매크로들도 설정할 수 있게끔.
+int run(BasePacketHandler **handlers, size_t handler_size) {
     int serv_sock = -1;
     int epfd = -1, event_cnt = 0;
 
@@ -45,17 +53,17 @@ int main(void)
 
     if ((serv_sock = SetTCPServSock(SERV_ADDR, SERV_PORT, SOMAXCONN, true)) < 0) {
         logger.Log(LOGLEVEL::ERROR, "SetTcpServSock: %s", strerror(errno));
-        exit(1);
+        return -1;
     }
 
     if ((epfd = InitEpoll(&ep_events, EPOLL_SIZE)) < 0) {
         logger.Log(LOGLEVEL::ERROR, "InitEpoll: %s", strerror(errno));
-        exit(1);
+        return -1;
     }
 
     if (SetETServSock(epfd, serv_sock) < 0) {
         logger.Log(LOGLEVEL::ERROR, "SetETServSock: %s", strerror(errno));
-        exit(1);
+        return -1;
     }
 
     SocketManager socketManager(serv_sock, epfd, &jobQueue, LOG_DIR, "SocketManager.txt");
@@ -63,9 +71,7 @@ int main(void)
         readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
     }
 
-    //Insert Packet Handles
-    BasePacketHandler *packetHandles[] = {};
-    BasePacketManager basePacketManager(packetHandles, sizeof(packetHandles) / sizeof(*packetHandles), PACKETMANAGER_DIR, "BasePacketManager.txt");
+    BasePacketManager basePacketManager(handlers, handler_size, PACKETMANAGER_DIR, "BasePacketManager.txt");
     workThread = new std::thread(WorkThread, &socketManager, &jobQueue, &basePacketManager);
 
     do
@@ -91,5 +97,5 @@ int main(void)
     free(ep_events);
     close(epfd);
     close(serv_sock);
-    exit(0);
+    return 0;
 }
