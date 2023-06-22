@@ -1,6 +1,7 @@
 #ifndef ECHO_PACKET_HANDLER_H
 #define ECHO_PACKET_HANDLER_H
 
+#include "ServerInfo.h"
 #include "Logger.h"
 #include "BasePacketHandler.h"
 
@@ -10,7 +11,7 @@ private:
 
     Logger logger;
 public:
-    EchoPacketHandler(const char *saveDir, const char *saveFile) : BasePacketHandler(DISCONNECT), logger(saveDir, saveFile) {
+    EchoPacketHandler(const char *saveDir, const char *saveFile) : BasePacketHandler(HANDLER_ECHO), logger(saveDir, saveFile) {
         
     }
 

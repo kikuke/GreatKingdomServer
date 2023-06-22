@@ -6,6 +6,9 @@
 #include "TSRingBuffer.h"
 #include "TSQueue.h"
 
+#define HANDLER_ECHO 0x01
+#define HANDLER_ECHO_ECHOTEST 0x01
+
 struct JobQueue
 {
     TSQueue<int> readQueue;
