@@ -15,6 +15,33 @@ struct EchoData
     char msg[ECHO_MAX_SIZE];
 };
 
+#define HANDLER_GAMEROOM 0x01
+struct ReturnRoomData
+{
+    // if success 1, else 0
+    int isSuccess;
+
+};
+
+#define HANDLER_GAMEROOM_RETURN 0x00
+#define HANDLER_GAMEROOM_GET 0x01
+
+#define HANDLER_GAMEROOM_CREATE 0x02
+struct CreateGameRoomData
+{
+    int roomID;
+};
+
+#define HANDLER_GAMEROOM_ENTER 0x03
+#define HANDLER_GAMEROOM_DELETE 0x04
+
+struct GameRoomInfo
+{
+    int roomID;
+    int player_num;
+    int player_socket[2];
+};
+
 struct JobQueue
 {
     TSQueue<int> readQueue;

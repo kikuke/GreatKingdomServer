@@ -30,14 +30,7 @@ using namespace std;
 int run(BasePacketHandler **handlers, size_t handler_size);
 
 int main(void)
-{
-    BasePacketHandler *handlers[] = {new EchoPacketHandler(LOG_DIR, "EchoPacketHandler.txt")};
-    run(handlers, sizeof(handlers) / sizeof(*handlers));
-}
-
-//Todo: 메이크파일 정리해서 다시 깔끔하게 만들어보기 CppServerTools합치기..?
-//Todo: 좀더 클래스로 추상화 시켜보기. 로거 디렉토리 설정 깔끔하게 해놓기. 다른 매크로들도 설정할 수 있게끔.
-int run(BasePacketHandler **handlers, size_t handler_size) {
+{   
     int serv_sock = -1;
     int epfd = -1, event_cnt = 0;
 
@@ -73,7 +66,8 @@ int run(BasePacketHandler **handlers, size_t handler_size) {
         readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
     }
 
-    BasePacketManager basePacketManager(handlers, handler_size, PACKETMANAGER_DIR, "BasePacketManager.txt");
+    BasePacketHandler *handlers[] = {new EchoPacketHandler(LOG_DIR, "EchoPacketHandler.txt")};
+    BasePacketManager basePacketManager(handlers, sizeof(handlers) / sizeof(*handlers), PACKETMANAGER_DIR, "BasePacketManager.txt");
     workThread = new std::thread(WorkThread, &socketManager, &jobQueue, &basePacketManager);
 
     do
