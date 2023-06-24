@@ -13,6 +13,7 @@
 #include "SocketManager.h"
 #include "ServerThread.h"
 #include "Logger.h"
+#include "EchoPacketHandler.h"
 
 #define SERV_ADDR INADDR_ANY
 #define SERV_PORT 1234
@@ -30,7 +31,7 @@ int run(BasePacketHandler **handlers, size_t handler_size);
 
 int main(void)
 {
-    BasePacketHandler *handlers[] = {};
+    BasePacketHandler *handlers[] = {new EchoPacketHandler(LOG_DIR, "EchoPacketHandler.txt")};
     run(handlers, sizeof(handlers) / sizeof(*handlers));
 }
 

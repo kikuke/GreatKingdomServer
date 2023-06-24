@@ -10,6 +10,8 @@ class EchoPacketHandler : public BasePacketHandler
 private:
 
     Logger logger;
+
+    int EchoMessage(int sock, EchoData& echo);
 public:
     EchoPacketHandler(const char *saveDir, const char *saveFile) : BasePacketHandler(HANDLER_ECHO), logger(saveDir, saveFile) {
         

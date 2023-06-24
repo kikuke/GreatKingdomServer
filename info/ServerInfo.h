@@ -8,6 +8,12 @@
 
 #define HANDLER_ECHO 0x01
 #define HANDLER_ECHO_ECHOTEST 0x01
+#define ECHO_MAX_SIZE 100
+
+struct EchoData
+{
+    char msg[ECHO_MAX_SIZE];
+};
 
 struct JobQueue
 {
