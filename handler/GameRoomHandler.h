@@ -33,6 +33,9 @@ private:
     int SetClntID(int sock, SetClntIDData& data);
 
     //if success return 0, error return -1
+    int GetGameRoom(int sock, GetGameRoomData& data);
+
+    //if success return 0, error return -1
     int CreateGameRoom(int sock, CreateGameRoomData& data);
 
     //if success return 0, error return -1

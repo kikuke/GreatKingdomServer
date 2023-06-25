@@ -39,6 +39,18 @@ struct SetClntIDData
 
 #define HANDLER_GAMEROOM_RETURN 0x01
 #define HANDLER_GAMEROOM_GET 0x02
+#define HANDLER_GAMEROOM_GETRETURN 0x0F
+struct GetGameRoomData
+{
+    int offset;
+};
+
+struct RoomDatas
+{
+    int roomNum;
+
+    GameRoomInfo roomInfo[20];
+};
 
 #define HANDLER_GAMEROOM_CREATE 0x03
 struct CreateGameRoomData

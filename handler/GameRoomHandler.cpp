@@ -72,11 +72,35 @@ int GameRoomHandler::catchError(int sock, unsigned int errorCode) {
     return 0;
 }
 
+int GameRoomHandler::GetGameRoom(int sock, GetGameRoomData& data) {
+    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(RoomDatas), HANDLER_GAMEROOM, HANDLER_GAMEROOM_GETRETURN, 0, 0};
+    BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
+
+    RoomDatas returnData = {};
+    size_t packet_len = -1;
+    std::map<int, GameRoomInfo*>::iterator iter;
+
+    int cnt=0, roomNum=0;
+    for (iter = rooms.begin(); iter != rooms.end(); iter++) {
+        if ((cnt - data.offset) >= 20)
+            break;
+        if (cnt >= data.offset) {
+            returnData.roomInfo[roomNum] = *iter->second;
+            roomNum++;
+        }
+
+        cnt++;
+    }
+    returnData.roomNum = roomNum;
+
+    packet_len = GetnerateBasePacket(send_buf, &header, &returnData, &trailer);
+    write(sock, send_buf, packet_len);
+    return 0;
+}
 
 int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
-    int outID = -1;
 
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
