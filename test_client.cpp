@@ -16,7 +16,9 @@ int HeaderCheck(BasePacketHeader& header);
 int TrailerCheck(BasePacketTrailer& trailer);
 template <typename T>
 int UnpackData(RingBuffer& buffer, T& data);
+int SendSetClntIDPacket(int sock, int clnt_id);
 int SendCreateGameRoomPacket(int sock, int roomID);
+int SendJoinGameRoomPacket(int sock, int roomID);
 
 int main(void)
 {
@@ -40,7 +42,19 @@ int main(void)
 
     connect(clnt_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 
+    if (SendSetClntIDPacket(clnt_sock, 20192388) < 0) {
+        puts("failed packet");
+    } else {
+        puts("success packet");
+    }
+
     if (SendCreateGameRoomPacket(clnt_sock, 13) < 0) {
+        puts("failed packet");
+    } else {
+        puts("success packet");
+    }
+
+    if (SendJoinGameRoomPacket(clnt_sock, 13) < 0) {
         puts("failed packet");
     } else {
         puts("success packet");
@@ -49,6 +63,40 @@ int main(void)
     close(clnt_sock);
 
     exit(1);
+}
+
+int SendSetClntIDPacket(int sock, int clnt_id) {
+    SetClntIDData sendData;
+    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(sendData), HANDLER_GAMEROOM, HANDLER_GAMEROOM_SETCLNTID, 0, 0};
+    BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
+    char buf[BUFFER_MAX_SIZE] = {};
+
+    size_t packet_len = -1;
+    size_t read_len = -1;
+
+    RingBuffer recvBuffer;
+    ReturnRoomData retData;
+    int ret;
+
+    sendData.clnt_id = clnt_id;
+    packet_len = GetnerateBasePacket(buf, &header, &sendData, &trailer);
+    if (write(sock, buf, packet_len) < packet_len) {
+        perror("write");
+        return -1;
+    }
+
+    while ((ret = UnpackData(recvBuffer, retData)) == 0) {
+        read_len = read(sock, buf, BUFFER_MAX_SIZE);
+        recvBuffer.enqueue(buf, read_len);
+    }
+    if (ret == -1) {
+        return -1;
+    }
+    if ((!retData.isSuccess)) {
+        return -1;
+    }
+    
+    return 0;
 }
 
 int SendCreateGameRoomPacket(int sock, int roomID) {
@@ -78,7 +126,41 @@ int SendCreateGameRoomPacket(int sock, int roomID) {
     if (ret == -1) {
         return -1;
     }
-    if ((!retData.isSuccess) || retData.roomID != roomID) {
+    if ((!retData.isSuccess) || retData.roomInfo.roomID != roomID) {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int SendJoinGameRoomPacket(int sock, int roomID) {
+    JoinGameRoomData sendData;
+    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(sendData), HANDLER_GAMEROOM, HANDLER_GAMEROOM_JOIN, 0, 0};
+    BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
+    char buf[BUFFER_MAX_SIZE] = {};
+
+    size_t packet_len = -1;
+    size_t read_len = -1;
+
+    RingBuffer recvBuffer;
+    ReturnRoomData retData;
+    int ret;
+
+    sendData.roomID = roomID;
+    packet_len = GetnerateBasePacket(buf, &header, &sendData, &trailer);
+    if (write(sock, buf, packet_len) < packet_len) {
+        perror("write");
+        return -1;
+    }
+
+    while ((ret = UnpackData(recvBuffer, retData)) == 0) {
+        read_len = read(sock, buf, BUFFER_MAX_SIZE);
+        recvBuffer.enqueue(buf, read_len);
+    }
+    if (ret == -1) {
+        return -1;
+    }
+    if ((!retData.isSuccess) || retData.roomInfo.roomID != roomID) {
         return -1;
     }
     

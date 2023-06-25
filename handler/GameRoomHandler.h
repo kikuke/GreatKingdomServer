@@ -20,14 +20,20 @@ private:
 
     Logger logger;
 
+    //success return info else NULL
+    GameRoomInfo* FindRoomInfo(int roomID);
+
     //return packet length
     size_t MakeReturnPacket(void *packet, ReturnRoomData& data);
+
+    //if success return 0, error return -1
+    int SetClntID(int sock, SetClntIDData& data);
 
     //if success return 0, error return -1
     int CreateGameRoom(int sock, CreateGameRoomData& data);
 
     //if success return 0, error return -1
-    int EnterGameRoom(int sock, EchoData& echo);
+    int JoinGameRoom(int sock, JoinGameRoomData& data);
 public:
     GameRoomHandler(const char *saveDir, const char *saveFile, SocketManager *socketManager) : BasePacketHandler(HANDLER_GAMEROOM), logger(saveDir, saveFile) {
         this->socketManager = socketManager;
