@@ -9,6 +9,7 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
     SetClntIDData setIDData;
     CreateGameRoomData createData;
     JoinGameRoomData joinData;
+    OutGameRoomData outData;
 
     switch (subOp)
     {
@@ -36,6 +37,16 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
 
         return JoinGameRoom(sock, joinData);//에러나면 에러코드가 반환됨.
         break;
+
+    case HANDLER_GAMEROOM_OUT:
+        if (UnpackData(buffer, outData) < 0) {
+            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+            return -1;//Todo: 에러코드로 바꿔주기
+        }
+
+        return OutGameRoom(sock, outData);//에러나면 에러코드가 반환됨.
+        break;
+
     default:
         logger.Log(LOGLEVEL::ERROR, "[%d] execute() - DataBroken", sock);
         return 0;
@@ -65,7 +76,9 @@ int GameRoomHandler::catchError(int sock, unsigned int errorCode) {
 int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
+    int outID = -1;
 
+    GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
 
     if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
@@ -73,12 +86,39 @@ int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
         return -1;
     }
 
-    
+    if ((roomInfo = FindRoomInfo(data.roomID)) == NULL) {
+        logger.Log(LOGLEVEL::ERROR, "[%s] OutGameRoom - %d failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
+        return -1;
+    }
+
+    for (int i=0; i<roomInfo->player_num; i++) {
+        if (roomInfo->playerID[i] == clntInfo->id) {
+            roomInfo->playerID[i] = 0;
+            if (i == 0) {
+                roomInfo->playerID[i] = roomInfo->playerID[i+1];
+                roomInfo->playerID[i+1] = 0;
+            }
+            roomInfo->player_num--;
+        }
+    }
     logger.Log(LOGLEVEL::INFO, "[%s] OutGameRoom: %d", inet_ntoa(clntInfo->sockAddr.sin_addr), clntInfo->id);
 
+    if (roomInfo->player_num <= 0) {
+        delete roomInfo;
+        roomInfo = NULL;
+        rooms.erase(data.roomID);
+        logger.Log(LOGLEVEL::INFO, "[%d] DeleteGameRoom", data.roomID);
+    }
+    
     returnData.isSuccess = 1;
     packet_len = MakeReturnPacket(send_buf, returnData);
     write(sock, send_buf, packet_len);
+    
+    //Todo: 방이 있을경우에만
+    if (roomInfo != NULL && BroadCastRoomInfo(data.roomID) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] Out GameRoom: Broadcast failed", data.roomID);
+        return -1;
+    }
     return 0;
 }
 
@@ -125,7 +165,7 @@ int GameRoomHandler::JoinGameRoom(int sock, JoinGameRoomData& data) {
     roomInfo->player_num++;
 
     if (BroadCastRoomInfo(data.roomID) < 0) {
-        logger.Log(LOGLEVEL::ERROR, "[%s] Join GameRoom - %d failed: Broadcast failed", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
+        logger.Log(LOGLEVEL::ERROR, "[%d] Join GameRoom: Broadcast failed", data.roomID);
         return -1;
     }
 
