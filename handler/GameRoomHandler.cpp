@@ -104,6 +104,7 @@ int GameRoomHandler::GetGameRoom(int sock, GetGameRoomData& data) {
     }
     returnData.roomNum = roomNum;
 
+    logger.Log(LOGLEVEL::INFO, "[%s] GetGameRoom - %d", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), roomNum);
     packet_len = GetnerateBasePacket(send_buf, &header, &returnData, &trailer);
     write(sock, send_buf, packet_len);
     return 0;
