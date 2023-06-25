@@ -7,6 +7,7 @@
 
 int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
     SetClntIDData setIDData;
+    GetGameRoomData getData;
     CreateGameRoomData createData;
     JoinGameRoomData joinData;
     OutGameRoomData outData;
@@ -21,6 +22,16 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
 
         return SetClntID(sock, setIDData);//에러나면 에러코드가 반환됨.
         break;
+    
+    case HANDLER_GAMEROOM_GET:
+        if (UnpackData(buffer, getData) < 0) {
+            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+            return -1;//Todo: 에러코드로 바꿔주기
+        }
+
+        return GetGameRoom(sock, getData);//에러나면 에러코드가 반환됨.
+        break;
+
     case HANDLER_GAMEROOM_CREATE:
         if (UnpackData(buffer, createData) < 0) {
             logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
