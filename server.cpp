@@ -14,6 +14,7 @@
 #include "ServerThread.h"
 #include "Logger.h"
 #include "EchoPacketHandler.h"
+#include "GameRoomHandler.h"
 
 #define SERV_ADDR INADDR_ANY
 #define SERV_PORT 1234
@@ -66,7 +67,7 @@ int main(void)
         readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
     }
 
-    BasePacketHandler *handlers[] = {new EchoPacketHandler(LOG_DIR, "EchoPacketHandler.txt")};
+    BasePacketHandler *handlers[] = {new EchoPacketHandler(LOG_DIR, "EchoPacketHandler.txt"), new GameRoomHandler(LOG_DIR, "GameRoomHandler.txt", &socketManager)};
     BasePacketManager basePacketManager(handlers, sizeof(handlers) / sizeof(*handlers), PACKETMANAGER_DIR, "BasePacketManager.txt");
     workThread = new std::thread(WorkThread, &socketManager, &jobQueue, &basePacketManager);
 

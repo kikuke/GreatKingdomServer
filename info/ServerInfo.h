@@ -15,11 +15,13 @@ struct EchoData
     char msg[ECHO_MAX_SIZE];
 };
 
-#define HANDLER_GAMEROOM 0x01
+#define HANDLER_GAMEROOM 0x02
 struct ReturnRoomData
 {
     // if success 1, else 0
     int isSuccess;
+
+    int roomID;
 
 };
 

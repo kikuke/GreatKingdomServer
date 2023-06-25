@@ -12,14 +12,14 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
     {
     case HANDLER_GAMEROOM_CREATE:
         if (UnpackData(buffer, createData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%s] DequeueData() - DataBroken", sock);
+            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
             return -1;//Todo: 에러코드로 바꿔주기
         }
 
         return CreateGameRoom(sock, createData);//에러나면 에러코드가 반환됨.
         break;
     default:
-        logger.Log(LOGLEVEL::ERROR, "[%s] execute() - DataBroken", sock);
+        logger.Log(LOGLEVEL::ERROR, "[%d] execute() - DataBroken", sock);
         return 0;
         break;
     }
@@ -61,6 +61,7 @@ int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
     logger.Log(LOGLEVEL::INFO, "[%s] Create GameRoom: %d", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
 
     returnData.isSuccess = 1;
+    returnData.roomID = rooms.find(data.roomID)->second->roomID;
     packet_len = MakeReturnPacket(send_buf, returnData);
     write(sock, send_buf, packet_len);
     return 0;
