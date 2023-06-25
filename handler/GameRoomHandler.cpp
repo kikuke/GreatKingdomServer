@@ -179,6 +179,7 @@ int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
     size_t packet_len = -1;
 
     info->roomID = data.roomID;
+    info->player_num = 0;
 
     std::pair<int, GameRoomInfo*> room(data.roomID, info);
     if (!rooms.insert(room).second) {
