@@ -51,7 +51,12 @@ struct JoinGameRoomData
 {
     int roomID;
 };
-#define HANDLER_GAMEROOM_DELETE 0x05
+
+#define HANDLER_GAMEROOM_OUT 0x05
+struct OutGameRoomData
+{
+    int roomID;
+};
 
 struct JobQueue
 {

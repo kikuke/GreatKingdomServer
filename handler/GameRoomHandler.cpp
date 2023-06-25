@@ -61,6 +61,27 @@ int GameRoomHandler::catchError(int sock, unsigned int errorCode) {
     return 0;
 }
 
+
+int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
+    ReturnRoomData returnData = {};
+    size_t packet_len = -1;
+
+    TCPSOCKETINFO *clntInfo;
+
+    if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
+        logger.Log(LOGLEVEL::ERROR, "[%s] OutGameRoom - %d failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), sock);
+        return -1;
+    }
+
+    
+    logger.Log(LOGLEVEL::INFO, "[%s] OutGameRoom: %d", inet_ntoa(clntInfo->sockAddr.sin_addr), clntInfo->id);
+
+    returnData.isSuccess = 1;
+    packet_len = MakeReturnPacket(send_buf, returnData);
+    write(sock, send_buf, packet_len);
+    return 0;
+}
+
 int GameRoomHandler::SetClntID(int sock, SetClntIDData& data) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
@@ -85,9 +106,6 @@ int GameRoomHandler::SetClntID(int sock, SetClntIDData& data) {
 }
 
 int GameRoomHandler::JoinGameRoom(int sock, JoinGameRoomData& data) {
-    ReturnRoomData returnData = {};
-    size_t packet_len = -1;
-
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
 
@@ -106,21 +124,9 @@ int GameRoomHandler::JoinGameRoom(int sock, JoinGameRoomData& data) {
     roomInfo->playerID[roomInfo->player_num] = clntInfo->id;
     roomInfo->player_num++;
 
-    returnData.isSuccess = 1;
-    returnData.roomInfo.roomID = data.roomID;
-    returnData.roomInfo.player_num = roomInfo->player_num;
-    returnData.roomInfo.playerID[0] = roomInfo->playerID[0];
-    returnData.roomInfo.playerID[1] = roomInfo->playerID[1];
-    packet_len = MakeReturnPacket(send_buf, returnData);
-
-    for (int i=0; i<roomInfo->player_num; i++) {
-        int clnt_sock;
-
-        if ((clnt_sock = socketManager->getSocketByID(roomInfo->playerID[i])) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%s] Join GameRoom - %d failed: no ID", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
-            return -1;
-        }
-        write(clnt_sock, send_buf, packet_len);
+    if (BroadCastRoomInfo(data.roomID) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%s] Join GameRoom - %d failed: Broadcast failed", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
+        return -1;
     }
 
     logger.Log(LOGLEVEL::INFO, "[%s] Join GameRoom: %d", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
@@ -147,6 +153,37 @@ int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
     returnData.roomInfo.roomID = data.roomID;
     packet_len = MakeReturnPacket(send_buf, returnData);
     write(sock, send_buf, packet_len);
+    return 0;
+}
+
+int GameRoomHandler::BroadCastRoomInfo(int roomID) {
+    ReturnRoomData returnData = {};
+
+    GameRoomInfo *roomInfo;
+    size_t packet_len = -1;
+
+    if ((roomInfo = FindRoomInfo(roomID)) == NULL) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] FindRoomInfo failed: no room", roomID);
+        return -1;
+    }
+
+    returnData.isSuccess = 1;
+    returnData.roomInfo.roomID = roomInfo->roomID;
+    returnData.roomInfo.player_num = roomInfo->player_num;
+    returnData.roomInfo.playerID[0] = roomInfo->playerID[0];
+    returnData.roomInfo.playerID[1] = roomInfo->playerID[1];
+    packet_len = MakeReturnPacket(send_buf, returnData);
+
+    for (int i=0; i<roomInfo->player_num; i++) {
+        int clnt_sock;
+
+        if ((clnt_sock = socketManager->getSocketByID(roomInfo->playerID[i])) < 0) {
+            logger.Log(LOGLEVEL::ERROR, "[%d] getSocketByID failed: no Info", roomInfo->playerID[i]);
+            return -1;
+        }
+        write(clnt_sock, send_buf, packet_len);
+    }
+
     return 0;
 }
 

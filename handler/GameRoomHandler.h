@@ -27,6 +27,9 @@ private:
     size_t MakeReturnPacket(void *packet, ReturnRoomData& data);
 
     //if success return 0, error return -1
+    int BroadCastRoomInfo(int roomID);
+
+    //if success return 0, error return -1
     int SetClntID(int sock, SetClntIDData& data);
 
     //if success return 0, error return -1
@@ -34,6 +37,9 @@ private:
 
     //if success return 0, error return -1
     int JoinGameRoom(int sock, JoinGameRoomData& data);
+
+    //if success return 0, error return -1
+    int OutGameRoom(int sock, OutGameRoomData& data);
 public:
     GameRoomHandler(const char *saveDir, const char *saveFile, SocketManager *socketManager) : BasePacketHandler(HANDLER_GAMEROOM), logger(saveDir, saveFile) {
         this->socketManager = socketManager;
