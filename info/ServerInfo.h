@@ -10,6 +10,8 @@
 #define HANDLER_ECHO_ECHOTEST 0x01
 #define ECHO_MAX_SIZE 100
 
+#pragma pack(4)
+
 struct GameRoomInfo
 {
     int roomID;
