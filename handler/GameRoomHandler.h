@@ -8,7 +8,7 @@
 #include "BasePacketHandler.h"
 #include "SocketManager.h"
 
-#define MAX_BUFFER_SIZE 2048
+#define MAX_BUFFER_SIZE 2048*2*2*2
 
 class GameRoomHandler : public BasePacketHandler
 {
