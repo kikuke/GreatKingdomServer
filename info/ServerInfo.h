@@ -15,6 +15,13 @@ struct GameRoomInfo
     int roomID;
     int player_num;
     int playerID[2];
+
+    int roomStatus;
+
+    int nowTurnID;
+    int panel[2*9*9];
+    double score[2];
+    int isPass[2];
 };
 
 struct EchoData

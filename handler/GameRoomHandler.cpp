@@ -214,8 +214,8 @@ int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
 
+    InitGameRoomInfo(info);
     info->roomID = data.roomID;
-    info->player_num = 0;
 
     std::pair<int, GameRoomInfo*> room(data.roomID, info);
     if (!rooms.insert(room).second) {
@@ -230,6 +230,26 @@ int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
     returnData.roomInfo.roomID = data.roomID;
     packet_len = MakeReturnPacket(send_buf, returnData);
     write(sock, send_buf, packet_len);
+    return 0;
+}
+
+int GameRoomHandler::InitGameRoomInfo(GameRoomInfo *info) {
+    if (info == NULL)
+        return -1;
+    info->roomID = -1;
+    info->player_num = 0;
+    info->playerID[0] = -1;
+    info->playerID[1] = -1;
+
+    info->roomStatus = 0;
+
+    info->nowTurnID = 0;
+    std::fill(info->panel, info->panel + sizeof(info->panel)/sizeof(int), 0);
+    info->score[0] = 0;
+    info->score[1] = 0;
+    info->isPass[0] = 0;
+    info->isPass[1] = 0;
+
     return 0;
 }
 

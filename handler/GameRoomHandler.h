@@ -20,6 +20,9 @@ private:
 
     Logger logger;
 
+    //if success return 0, error return -1
+    int InitGameRoomInfo(GameRoomInfo *info);
+
     //success return info else NULL
     GameRoomInfo* FindRoomInfo(int roomID);
 
