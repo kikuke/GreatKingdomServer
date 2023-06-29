@@ -46,6 +46,9 @@ private:
 
     //if success return 0, error return -1
     int OutGameRoom(int sock, OutGameRoomData& data);
+
+    //if success return 0, error return -1
+    int UpdateGameRoom(int sock, UpdateGameRoomData& data);
 public:
     GameRoomHandler(const char *saveDir, const char *saveFile, SocketManager *socketManager) : BasePacketHandler(HANDLER_GAMEROOM), logger(saveDir, saveFile) {
         this->socketManager = socketManager;

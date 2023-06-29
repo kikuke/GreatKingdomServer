@@ -81,6 +81,12 @@ struct OutGameRoomData
     int roomID;
 };
 
+#define HANDLER_GAMEROOM_UPDATE 0x06
+struct UpdateGameRoomData
+{
+    GameRoomInfo roomInfo;
+};
+
 struct JobQueue
 {
     TSQueue<int> readQueue;
