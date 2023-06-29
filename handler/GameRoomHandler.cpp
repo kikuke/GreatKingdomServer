@@ -93,6 +93,20 @@ int GameRoomHandler::catchError(int sock, unsigned int errorCode) {
     return 0;
 }
 
+int GameRoomHandler::UpdateInfo(GameRoomInfo *info, GameRoomInfo data) {
+    if (info == NULL)
+        return -1;
+    
+    data.roomID = info->roomID;
+    data.player_num = info->player_num;
+    data.playerID[0] = info->playerID[0];
+    data.playerID[1] = info->playerID[1];
+
+    *info = data;
+    
+    return 0;
+}
+
 int GameRoomHandler::UpdateGameRoom(int sock, UpdateGameRoomData& data) {
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
@@ -102,7 +116,10 @@ int GameRoomHandler::UpdateGameRoom(int sock, UpdateGameRoomData& data) {
         return -1;
     }
 
-    *roomInfo = data.roomInfo;
+    if (UpdateInfo(roomInfo, data.roomInfo) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%s] Update GameRoom - %d failed: Update Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomInfo.roomID);
+        return -1;
+    }
 
     if (BroadCastRoomInfo(data.roomInfo.roomID) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] Update GameRoom: Broadcast failed", data.roomInfo.roomID);

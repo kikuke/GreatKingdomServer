@@ -30,6 +30,9 @@ private:
     size_t MakeReturnPacket(void *packet, ReturnRoomData& data);
 
     //if success return 0, error return -1
+    int UpdateInfo(GameRoomInfo *info, GameRoomInfo data);
+
+    //if success return 0, error return -1
     int BroadCastRoomInfo(int roomID);
 
     //if success return 0, error return -1
