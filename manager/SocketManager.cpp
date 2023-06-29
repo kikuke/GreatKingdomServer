@@ -9,6 +9,8 @@
 #include "SocketManager.h"
 
 int SocketManager::getSocketByID(int id) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     std::map<int, int>::iterator iter = id_socketMap.find(id);
     if(iter == id_socketMap.end())
         return -1;
@@ -17,6 +19,8 @@ int SocketManager::getSocketByID(int id) {
 }
 
 TCPSOCKETINFO* SocketManager::getSocketInfo(int socket) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     std::map<int, TCPSOCKETINFO*>::iterator iter = socketInfo.find(socket);
     if(iter == socketInfo.end())
         return NULL;
@@ -25,6 +29,8 @@ TCPSOCKETINFO* SocketManager::getSocketInfo(int socket) {
 }
 
 int SocketManager::AddID(int id, int sock) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     TCPSOCKETINFO *info;
 
     if (!id_socketMap.insert(std::pair<int, int>(id, sock)).second) {
@@ -45,11 +51,15 @@ int SocketManager::AddID(int id, int sock) {
 }
 
 void SocketManager::RemoveTCPSOCKETINFO(TCPSOCKETINFO *info) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     delete info->recvBuffer;
     delete info;
 }
 
 int SocketManager::AddSocketInfo(int socket) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     TCPSOCKETINFO *info = new TCPSOCKETINFO;
     socklen_t socklen = sizeof(info->sockAddr);
 
@@ -70,6 +80,8 @@ int SocketManager::AddSocketInfo(int socket) {
 }
 
 int SocketManager::DelSocketInfo(int socket) {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     TCPSOCKETINFO *info;
 
     if ((info = getSocketInfo(socket)) == NULL) {
@@ -89,6 +101,8 @@ int SocketManager::DelSocketInfo(int socket) {
 }
 
 int SocketManager::AcceptNewClient() {
+    std::unique_lock<std::recursive_mutex> lock(m_mutex);
+
     int clnt_sock = -1;
     struct sockaddr_in clnt_addr;
     socklen_t addr_sz = sizeof(clnt_addr);

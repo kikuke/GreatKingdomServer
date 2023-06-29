@@ -10,7 +10,7 @@
 #define HANDLER_ECHO_ECHOTEST 0x01
 #define ECHO_MAX_SIZE 100
 
-#pragma pack(4)
+#pragma pack(push, 4)
 
 struct GameRoomInfo
 {
@@ -25,6 +25,8 @@ struct GameRoomInfo
     double score[2];
     int isPass[2];
 };
+
+#pragma pack(pop)
 
 struct EchoData
 {

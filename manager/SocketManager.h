@@ -3,6 +3,8 @@
 
 #include <map>
 
+#include <mutex>
+
 #include "ServerInfo.h"
 #include "Logger.h"
 
@@ -17,6 +19,8 @@ private:
     std::map<int, TCPSOCKETINFO*> socketInfo;
 
     Logger logger;
+
+    std::recursive_mutex m_mutex;
 
     void RemoveTCPSOCKETINFO(TCPSOCKETINFO *info);
 
