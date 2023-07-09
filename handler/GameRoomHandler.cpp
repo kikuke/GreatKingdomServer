@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
+#include "BasePacket.h"
 #include "GameRoomHandler.h"
 
 int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
@@ -74,7 +75,7 @@ int GameRoomHandler::UpdateGameRoom(int sock, RingBuffer& buffer) {
 
     UpdateGameRoomData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -108,7 +109,7 @@ int GameRoomHandler::GetGameRoom(int sock, RingBuffer& buffer) {
 
     GetGameRoomData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -141,7 +142,7 @@ int GameRoomHandler::OutGameRoom(int sock, RingBuffer& buffer) {
 
     OutGameRoomData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -193,7 +194,7 @@ int GameRoomHandler::JoinGameRoom(int sock, RingBuffer& buffer) {
 
     JoinGameRoomData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -229,7 +230,7 @@ int GameRoomHandler::CreateGameRoom(int sock, RingBuffer& buffer) {
 
     CreateGameRoomData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }

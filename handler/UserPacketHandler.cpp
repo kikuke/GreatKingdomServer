@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <arpa/inet.h>
 
+#include "BasePacket.h"
 #include "UserPacketHandler.h"
 
 int UserPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
@@ -51,7 +52,7 @@ int UserPacketHandler::CloseUser(int sock, RingBuffer& buffer) {
     TCPSOCKETINFO *clntInfo;
 
     //Todo: 잘 작동되는지
-    if (UnpackData(buffer, (void *)0) < 0) {
+    if (UnpackData(buffer) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -82,7 +83,7 @@ int UserPacketHandler::SetClntID(int sock, RingBuffer& buffer) {
 
     SetClntIDData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
@@ -107,7 +108,7 @@ int UserPacketHandler::SetClntID(int sock, RingBuffer& buffer) {
 int UserPacketHandler::EchoMessage(int sock, RingBuffer& buffer) {
     EchoData data;
 
-    if (UnpackData(buffer, &data) < 0) {
+    if (UnpackData(buffer, data) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
         return -1;//Todo: 에러코드로 바꿔주기
     }
