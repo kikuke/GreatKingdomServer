@@ -67,7 +67,7 @@ int main(void)
         readThreads[i] = new std::thread(ReadThread, &socketManager, &jobQueue, READ_BUFFER_SIZE);
     }
 
-    BasePacketHandler *handlers[] = {new UserPacketHandler(LOG_DIR, "UserPacketHandler.txt"), new GameRoomHandler(LOG_DIR, "GameRoomHandler.txt", &socketManager)};
+    BasePacketHandler *handlers[] = {new UserPacketHandler(LOG_DIR, "UserPacketHandler.txt", &socketManager), new GameRoomHandler(LOG_DIR, "GameRoomHandler.txt", &socketManager)};
     BasePacketManager basePacketManager(handlers, sizeof(handlers) / sizeof(*handlers), PACKETMANAGER_DIR, "BasePacketManager.txt");
     workThread = new std::thread(WorkThread, &socketManager, &jobQueue, &basePacketManager);
 

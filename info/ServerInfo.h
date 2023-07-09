@@ -7,7 +7,19 @@
 #include "TSQueue.h"
 
 #define HANDLER_USER 0x01
-#define HANDLER_USER_ECHOTEST 0x01
+struct ReturnUserData
+{
+    // if success 1, else 0
+    int isSuccess;
+};
+
+#define HANDLER_USER_SETCLNTID 0x00
+struct SetClntIDData
+{
+    int clnt_id;
+};
+
+#define HANDLER_USER_ECHOTEST 0xFF
 #define ECHO_MAX_SIZE 100
 
 #pragma pack(push, 4)
@@ -40,12 +52,6 @@ struct ReturnRoomData
     int isSuccess;
 
     GameRoomInfo roomInfo;
-};
-
-#define HANDLER_GAMEROOM_SETCLNTID 0x00
-struct SetClntIDData
-{
-    int clnt_id;
 };
 
 #define HANDLER_GAMEROOM_RETURN 0x01

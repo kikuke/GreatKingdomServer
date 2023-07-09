@@ -36,10 +36,6 @@ private:
     int BroadCastRoomInfo(int roomID);
 
     //* Handler *
-
-    //if success return 0, error return -1
-    int SetClntID(int sock, RingBuffer& buffer);
-
     //if success return 0, error return -1
     int GetGameRoom(int sock, RingBuffer& buffer);
 

@@ -9,10 +9,6 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
 
     switch (subOp)
     {
-    case HANDLER_GAMEROOM_SETCLNTID:
-        return SetClntID(sock, buffer);//에러나면 에러코드가 반환됨.
-        break;
-    
     case HANDLER_GAMEROOM_GET:
         return GetGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
@@ -20,6 +16,7 @@ int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
     case HANDLER_GAMEROOM_CREATE:
         return CreateGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
+
     case HANDLER_GAMEROOM_JOIN:
         return JoinGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
@@ -187,36 +184,6 @@ int GameRoomHandler::OutGameRoom(int sock, RingBuffer& buffer) {
         logger.Log(LOGLEVEL::ERROR, "[%d] Out GameRoom: Broadcast failed", data.roomID);
         return -1;
     }
-    return 0;
-}
-
-int GameRoomHandler::SetClntID(int sock, RingBuffer& buffer) {
-    ReturnRoomData returnData = {};
-    size_t packet_len = -1;
-
-    TCPSOCKETINFO *clntInfo;
-
-    SetClntIDData data;
-
-    if (UnpackData(buffer, &data) < 0) {
-        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-        return -1;//Todo: 에러코드로 바꿔주기
-    }
-
-    if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
-        logger.Log(LOGLEVEL::ERROR, "[%s] AddID - %d failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.clnt_id);
-        return -1;
-    }
-
-    if (socketManager->AddID(data.clnt_id, sock) < 0) {
-        logger.Log(LOGLEVEL::ERROR, "[%s] AddID - %d failed: id conflict", inet_ntoa(clntInfo->sockAddr.sin_addr), data.clnt_id);
-        return -1;
-    }
-    logger.Log(LOGLEVEL::INFO, "[%s] SetClntID: %d", inet_ntoa(clntInfo->sockAddr.sin_addr), data.clnt_id);
-
-    returnData.isSuccess = 1;
-    packet_len = MakeReturnPacket(send_buf, returnData);
-    write(sock, send_buf, packet_len);
     return 0;
 }
 
