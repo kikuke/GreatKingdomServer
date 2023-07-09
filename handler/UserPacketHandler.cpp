@@ -12,6 +12,10 @@ int UserPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer)
         return SetClntID(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
 
+    case HANDLER_USER_CLOSE:
+        return CloseUser(sock, buffer);
+        break;
+
     case HANDLER_USER_ECHOTEST:
         return EchoMessage(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
@@ -37,6 +41,36 @@ int UserPacketHandler::catchError(int sock, unsigned int errorCode) {
         return -1;
         break;
     }
+    return 0;
+}
+
+int UserPacketHandler::CloseUser(int sock, RingBuffer& buffer) {
+    ReturnUserData returnData = {};
+    size_t packet_len = -1;
+
+    TCPSOCKETINFO *clntInfo;
+
+    //Todo: 잘 작동되는지
+    if (UnpackData(buffer, (void *)0) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
+
+    if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
+        logger.Log(LOGLEVEL::ERROR, "[%s] CloseUser failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr));
+        return -1;
+    }
+    logger.Log(LOGLEVEL::INFO, "[%s] CloseUser", inet_ntoa(clntInfo->sockAddr.sin_addr));
+
+    if ((socketManager->DelSocketInfo(sock) < 0)) {
+        logger.Log(LOGLEVEL::ERROR, "DelSocketInfo failed: %d", sock);
+        return -1;
+    }
+
+    returnData.isSuccess = 1;
+    packet_len = MakeReturnPacket(send_buf, returnData);
+    write(sock, send_buf, packet_len);
+    close(sock);
     return 0;
 }
 

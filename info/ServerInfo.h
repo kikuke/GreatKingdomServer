@@ -19,6 +19,8 @@ struct SetClntIDData
     int clnt_id;
 };
 
+#define HANDLER_USER_CLOSE 0x01
+
 #define HANDLER_USER_ECHOTEST 0xFF
 #define ECHO_MAX_SIZE 100
 

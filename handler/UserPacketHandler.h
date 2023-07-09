@@ -27,9 +27,9 @@ private:
     //if success return 0, error return -1
     int SetClntID(int sock, RingBuffer& buffer);
 
+    //if success return 0, error return -1
+    int CloseUser(int sock, RingBuffer& buffer);
 
-    //Todo: 유저 정보 삭제 패킷 하나 만들기
-    //Todo: 유저 ID 변경 패킷 옮기기
 public:
     UserPacketHandler(const char *saveDir, const char *saveFile, SocketManager *socketManager) : BasePacketHandler(HANDLER_USER), logger(saveDir, saveFile) {
         this->socketManager = socketManager;
