@@ -9,7 +9,7 @@ int EchoPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer)
     switch (subOp)
     {
     case HANDLER_ECHO_ECHOTEST:
-        if (UnpackData(buffer, data) < 0) {
+        if (UnpackData(buffer, &data) < 0) {
             logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
             return -1;//Todo: 에러코드로 바꿔주기
         }

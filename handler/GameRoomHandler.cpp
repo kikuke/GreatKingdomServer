@@ -6,66 +6,30 @@
 #include "GameRoomHandler.h"
 
 int GameRoomHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
-    SetClntIDData setIDData;
-    GetGameRoomData getData;
-    CreateGameRoomData createData;
-    JoinGameRoomData joinData;
-    OutGameRoomData outData;
-    UpdateGameRoomData updateData;
 
     switch (subOp)
     {
     case HANDLER_GAMEROOM_SETCLNTID:
-        if (UnpackData(buffer, setIDData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return SetClntID(sock, setIDData);//에러나면 에러코드가 반환됨.
+        return SetClntID(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
     
     case HANDLER_GAMEROOM_GET:
-        if (UnpackData(buffer, getData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return GetGameRoom(sock, getData);//에러나면 에러코드가 반환됨.
+        return GetGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
 
     case HANDLER_GAMEROOM_CREATE:
-        if (UnpackData(buffer, createData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return CreateGameRoom(sock, createData);//에러나면 에러코드가 반환됨.
+        return CreateGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
     case HANDLER_GAMEROOM_JOIN:
-        if (UnpackData(buffer, joinData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return JoinGameRoom(sock, joinData);//에러나면 에러코드가 반환됨.
+        return JoinGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
 
     case HANDLER_GAMEROOM_OUT:
-        if (UnpackData(buffer, outData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return OutGameRoom(sock, outData);//에러나면 에러코드가 반환됨.
+        return OutGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
 
     case HANDLER_GAMEROOM_UPDATE:
-        if (UnpackData(buffer, updateData) < 0) {
-            logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
-            return -1;//Todo: 에러코드로 바꿔주기
-        }
-
-        return UpdateGameRoom(sock, updateData);//에러나면 에러코드가 반환됨.
+        return UpdateGameRoom(sock, buffer);//에러나면 에러코드가 반환됨.
         break;
 
     default:
@@ -107,9 +71,16 @@ int GameRoomHandler::UpdateInfo(GameRoomInfo *info, GameRoomInfo data) {
     return 0;
 }
 
-int GameRoomHandler::UpdateGameRoom(int sock, UpdateGameRoomData& data) {
+int GameRoomHandler::UpdateGameRoom(int sock, RingBuffer& buffer) {
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
+
+    UpdateGameRoomData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     if ((roomInfo = FindRoomInfo(data.roomInfo.roomID)) == NULL) {
         logger.Log(LOGLEVEL::ERROR, "[%s] Update GameRoom - %d failed: no room", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomInfo.roomID);
@@ -130,13 +101,20 @@ int GameRoomHandler::UpdateGameRoom(int sock, UpdateGameRoomData& data) {
     return 0;
 }
 
-int GameRoomHandler::GetGameRoom(int sock, GetGameRoomData& data) {
+int GameRoomHandler::GetGameRoom(int sock, RingBuffer& buffer) {
     BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(RoomDatas), HANDLER_GAMEROOM, HANDLER_GAMEROOM_GETRETURN, 0, 0};
     BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
 
     RoomDatas returnData = {};
     size_t packet_len = -1;
     std::map<int, GameRoomInfo*>::iterator iter;
+
+    GetGameRoomData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     int cnt=0, roomNum=0;
     for (iter = rooms.begin(); iter != rooms.end(); iter++) {
@@ -157,12 +135,19 @@ int GameRoomHandler::GetGameRoom(int sock, GetGameRoomData& data) {
     return 0;
 }
 
-int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
+int GameRoomHandler::OutGameRoom(int sock, RingBuffer& buffer) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
 
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
+
+    OutGameRoomData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
         logger.Log(LOGLEVEL::ERROR, "[%s] OutGameRoom - %d failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), sock);
@@ -205,11 +190,18 @@ int GameRoomHandler::OutGameRoom(int sock, OutGameRoomData& data) {
     return 0;
 }
 
-int GameRoomHandler::SetClntID(int sock, SetClntIDData& data) {
+int GameRoomHandler::SetClntID(int sock, RingBuffer& buffer) {
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
 
     TCPSOCKETINFO *clntInfo;
+
+    SetClntIDData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     if ((clntInfo = socketManager->getSocketInfo(sock)) == NULL) {
         logger.Log(LOGLEVEL::ERROR, "[%s] AddID - %d failed: No Info", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.clnt_id);
@@ -228,9 +220,16 @@ int GameRoomHandler::SetClntID(int sock, SetClntIDData& data) {
     return 0;
 }
 
-int GameRoomHandler::JoinGameRoom(int sock, JoinGameRoomData& data) {
+int GameRoomHandler::JoinGameRoom(int sock, RingBuffer& buffer) {
     GameRoomInfo *roomInfo;
     TCPSOCKETINFO *clntInfo;
+
+    JoinGameRoomData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     if ((roomInfo = FindRoomInfo(data.roomID)) == NULL) {
         logger.Log(LOGLEVEL::ERROR, "[%s] Join GameRoom - %d failed: no room", inet_ntoa(socketManager->getSocketInfo(sock)->sockAddr.sin_addr), data.roomID);
@@ -256,10 +255,17 @@ int GameRoomHandler::JoinGameRoom(int sock, JoinGameRoomData& data) {
     return 0;
 }
 
-int GameRoomHandler::CreateGameRoom(int sock, CreateGameRoomData& data) {
+int GameRoomHandler::CreateGameRoom(int sock, RingBuffer& buffer) {
     GameRoomInfo *info = new GameRoomInfo;
     ReturnRoomData returnData = {};
     size_t packet_len = -1;
+
+    CreateGameRoomData data;
+
+    if (UnpackData(buffer, &data) < 0) {
+        logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
+        return -1;//Todo: 에러코드로 바꿔주기
+    }
 
     InitGameRoomInfo(info);
     info->roomID = data.roomID;

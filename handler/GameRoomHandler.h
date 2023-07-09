@@ -35,23 +35,25 @@ private:
     //if success return 0, error return -1
     int BroadCastRoomInfo(int roomID);
 
-    //if success return 0, error return -1
-    int SetClntID(int sock, SetClntIDData& data);
+    //* Handler *
 
     //if success return 0, error return -1
-    int GetGameRoom(int sock, GetGameRoomData& data);
+    int SetClntID(int sock, RingBuffer& buffer);
 
     //if success return 0, error return -1
-    int CreateGameRoom(int sock, CreateGameRoomData& data);
+    int GetGameRoom(int sock, RingBuffer& buffer);
 
     //if success return 0, error return -1
-    int JoinGameRoom(int sock, JoinGameRoomData& data);
+    int CreateGameRoom(int sock, RingBuffer& buffer);
 
     //if success return 0, error return -1
-    int OutGameRoom(int sock, OutGameRoomData& data);
+    int JoinGameRoom(int sock, RingBuffer& buffer);
 
     //if success return 0, error return -1
-    int UpdateGameRoom(int sock, UpdateGameRoomData& data);
+    int OutGameRoom(int sock, RingBuffer& buffer);
+
+    //if success return 0, error return -1
+    int UpdateGameRoom(int sock, RingBuffer& buffer);
 public:
     GameRoomHandler(const char *saveDir, const char *saveFile, SocketManager *socketManager) : BasePacketHandler(HANDLER_GAMEROOM), logger(saveDir, saveFile) {
         this->socketManager = socketManager;

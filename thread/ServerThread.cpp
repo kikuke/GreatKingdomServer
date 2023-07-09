@@ -49,6 +49,7 @@ void ReadThread(SocketManager *socketManager, JobQueue *jobQueue, const int buf_
             continue;
         }
         //disconnect
+        //Todo: 연결종료시 제대로 인식하지 못하는 문제
         if (RingBufferReader(sock, buf, buf_sz, info->recvBuffer) == 0) {
             logger.Log(LOGLEVEL::DEBUG, "[%s]Disconnecting", inet_ntoa((info->sockAddr).sin_addr));
             close(sock);
