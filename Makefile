@@ -1,6 +1,6 @@
 INCLUDE = -I../CppServerTools/socket/ -I../CppServerTools/struct/ -I../CppServerTools/epoll/ -I../CppServerTools/packet/basepacket -I../CppServerTools/log/ -Iinfo/ -Istruct/ -Imanager/ -Ithread/ -Ihandler/
 SUBDIRS = manager thread handler
-MODULE = manager/SocketManager.o thread/ServerThread.o handler/EchoPacketHandler.o handler/GameRoomHandler.o
+MODULE = manager/SocketManager.o thread/ServerThread.o handler/UserPacketHandler.o handler/GameRoomHandler.o
 RESULT = server
 CC = g++ -g
 

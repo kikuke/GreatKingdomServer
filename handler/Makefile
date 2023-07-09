@@ -1,5 +1,5 @@
 INCLUDE = -I../../CppServerTools/epoll/ -I../../CppServerTools/socket/ -I../../CppServerTools/struct/ -I../../CppServerTools/epoll/ -I../../CppServerTools/packet/basepacket -I../../CppServerTools/log/ -I../info/ -I../struct/ -I../manager/
-MAKE_HANDLER = EchoPacketHandler.o GameRoomHandler.o
+MAKE_HANDLER = UserPacketHandler.o GameRoomHandler.o
 CC = g++ -g
 
 #Init
@@ -15,7 +15,7 @@ clean:
 
 
 #MAKE_HANDLER
-EchoPacketHandler.o: EchoPacketHandler.cpp
+UserPacketHandler.o: UserPacketHandler.cpp
 	$(CC) $(INCLUDE) -c $^
 
 GameRoomHandler.o: GameRoomHandler.cpp

@@ -2,13 +2,13 @@
 #include <string.h>
 #include <errno.h>
 
-#include "EchoPacketHandler.h"
+#include "UserPacketHandler.h"
 
-int EchoPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
+int UserPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer) {
     EchoData data;
     switch (subOp)
     {
-    case HANDLER_ECHO_ECHOTEST:
+    case HANDLER_USER_ECHOTEST:
         if (UnpackData(buffer, &data) < 0) {
             logger.Log(LOGLEVEL::ERROR, "[%d] DequeueData() - DataBroken", sock);
             return -1;//Todo: 에러코드로 바꿔주기
@@ -24,7 +24,7 @@ int EchoPacketHandler::execute(int sock, unsigned int subOp, RingBuffer& buffer)
     return 1;
 }
 
-int EchoPacketHandler::catchError(int sock, unsigned int errorCode) {
+int UserPacketHandler::catchError(int sock, unsigned int errorCode) {
     switch (errorCode)
     {
     default:
@@ -35,7 +35,7 @@ int EchoPacketHandler::catchError(int sock, unsigned int errorCode) {
     return 0;
 }
 
-int EchoPacketHandler::EchoMessage(int sock, EchoData& echo) {
+int UserPacketHandler::EchoMessage(int sock, EchoData& echo) {
     if (write(sock, echo.msg, sizeof(echo.msg)) < 0) {
         logger.Log(LOGLEVEL::ERROR, "[%d] write error: %s", sock, strerror(errno));
         return -1;//Todo: 에러코드로 바꿔주기
