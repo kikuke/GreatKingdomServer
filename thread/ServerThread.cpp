@@ -64,12 +64,11 @@ void ReadThread(SocketManager *socketManager, JobQueue *jobQueue, const int buf_
 void WorkThread(SocketManager *socketManager, JobQueue *jobQueue, BasePacketManager *basePacketManager) {
     int sock;
 
-    TCPSOCKETINFO *info;
-
     Logger logger(LOG_DIR, "WorkThread.txt");
     logger.Log(LOGLEVEL::DEBUG, "Work Thread Start...");
 
     while ((sock = jobQueue->workQueue.pop())) {
+        TCPSOCKETINFO *info = nullptr;
         logger.Log(LOGLEVEL::DEBUG, "Work Socket: %d", sock);
 
         if ((info = socketManager->getSocketInfo(sock)) == NULL) {

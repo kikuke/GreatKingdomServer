@@ -11,7 +11,7 @@
 int SocketManager::getSocketByID(int id) {
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    std::map<int, int>::iterator iter = id_socketMap.find(id);
+    auto iter = id_socketMap.find(id);
     if(iter == id_socketMap.end())
         return -1;
 
@@ -21,7 +21,7 @@ int SocketManager::getSocketByID(int id) {
 TCPSOCKETINFO* SocketManager::getSocketInfo(int socket) {
     std::unique_lock<std::recursive_mutex> lock(m_mutex);
 
-    std::map<int, TCPSOCKETINFO*>::iterator iter = socketInfo.find(socket);
+    auto iter = socketInfo.find(socket);
     if(iter == socketInfo.end())
         return NULL;
 

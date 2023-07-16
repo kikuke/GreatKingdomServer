@@ -26,14 +26,12 @@ int main(void)
     int clnt_sock = socket(PF_INET, SOCK_STREAM, 0);
     int readLen = -1;
     int writeLen = -1;
+    int packet_len = -1;
 
     char send_buf[BUFFER_MAX_SIZE] = {};
     char recv_buf[BUFFER_MAX_SIZE] = {};
-    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(EchoData), HANDLER_ECHO, HANDLER_ECHO_ECHOTEST, 0, 0};
+    BasePacketHeader header = {TCP_PACKET_START_CODE, 0, HANDLER_USER, HANDLER_USER_CLOSE, 0, 0};
     BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
-
-    EchoData echoData;
-    size_t packetLen = -1;
 
     memset(&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family=AF_INET;
@@ -42,32 +40,20 @@ int main(void)
 
     connect(clnt_sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
 
-    if (SendSetClntIDPacket(clnt_sock, 20192388) < 0) {
-        puts("failed packet");
-    } else {
-        puts("success packet");
+    packet_len = GetnerateBasePacket(send_buf, &header, NULL, &trailer);
+    if (write(clnt_sock, send_buf, packet_len) < packet_len) {
+        perror("write");
+        return -1;
     }
 
-    if (SendCreateGameRoomPacket(clnt_sock, 13) < 0) {
-        puts("failed packet");
-    } else {
-        puts("success packet");
-    }
-
-    if (SendJoinGameRoomPacket(clnt_sock, 13) < 0) {
-        puts("failed packet");
-    } else {
-        puts("success packet");
-    }
-
-    close(clnt_sock);
+    //close(clnt_sock);
 
     exit(1);
 }
 
 int SendSetClntIDPacket(int sock, int clnt_id) {
     SetClntIDData sendData;
-    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(sendData), HANDLER_GAMEROOM, HANDLER_GAMEROOM_SETCLNTID, 0, 0};
+    BasePacketHeader header = {TCP_PACKET_START_CODE, sizeof(sendData), HANDLER_GAMEROOM, HANDLER_USER_SETCLNTID, 0, 0};
     BasePacketTrailer trailer = {TCP_PACKET_END_CODE};
     char buf[BUFFER_MAX_SIZE] = {};
 
