@@ -71,12 +71,10 @@ void WorkThread(SocketManager *socketManager, JobQueue *jobQueue, BasePacketMana
         TCPSOCKETINFO *info = nullptr;
         logger.Log(LOGLEVEL::DEBUG, "Work Socket: %d", sock);
 
-        if ((info = socketManager->getSocketInfo(sock)) == NULL) {
-            logger.Log(LOGLEVEL::ERROR, "Can't find Socket To Work: %d", sock);
-            continue;
-        }
-
-        while (basePacketManager->execute(sock, *(info->recvBuffer)) != -1) {
+        while ((info = socketManager->getSocketInfo(sock)) != NULL) {
+            if (basePacketManager->execute(sock, *(info->recvBuffer)) < 0)
+                break;
+            
             logger.Log(LOGLEVEL::DEBUG, "basePacketManager execute: %d", sock);
         }
     }
