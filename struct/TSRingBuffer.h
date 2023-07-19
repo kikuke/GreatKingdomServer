@@ -11,6 +11,9 @@ private:
     std::recursive_mutex m_mutex;
 
 public:
+    virtual ~TSRingBuffer() override {
+        RingBuffer::~RingBuffer();
+    }
 
     virtual size_t getUseSize() override {
         std::unique_lock<std::recursive_mutex> lock(m_mutex);
