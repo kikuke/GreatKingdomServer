@@ -34,10 +34,11 @@ struct GameRoomInfo
 
     int roomStatus;
 
-    int nowTurnID;
-    int panel[2*9*9];
-    double score[2];
-    int isPass[2];
+    int panel[9*9];
+    int passNum;
+
+    int isCSP1;
+    int isCSP2;
 };
 
 #pragma pack(pop)
