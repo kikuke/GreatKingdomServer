@@ -33,6 +33,7 @@ struct GameRoomInfo
     int playerID[2];
 
     int roomStatus;
+    int roomStatusBefore;
 
     int panel[9*9];
     int passNum;

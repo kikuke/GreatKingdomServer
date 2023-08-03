@@ -263,6 +263,7 @@ int GameRoomHandler::InitGameRoomInfo(GameRoomInfo *info) {
     info->playerID[1] = -1;
 
     info->roomStatus = 0;
+    info->roomStatusBefore = 0;
 
     std::fill(info->panel, info->panel + sizeof(info->panel)/sizeof(int), 0);
     info->passNum = 0;
